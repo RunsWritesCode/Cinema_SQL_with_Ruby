@@ -2,12 +2,11 @@ require('pg')
 require_relative('../db/sql_runner')
 
 class Customer
-  attr_accessor :name, :funds
-  attr_reader :id
+  attr_accessor :name, :funds, :id
 
   def initialize(options)
     @name = options['name']
-    @funds = options['funds']
+    @funds = options['funds'].to_i
     @id = options['id'].to_i if options['id']
   end
 
@@ -15,7 +14,7 @@ class Customer
     sql = "INSERT INTO customers (name, funds)
     VALUES ($1,$2)
     RETURNING *"
-    values = [@name, @afunds]
+    values = [@name, @funds]
     @id = SqlRunner.run(sql, values)[0]["id"].to_i
   end
 
@@ -28,9 +27,40 @@ class Customer
   end
 
   def self.delete_all()
-  sql = "DELETE FROM customers"
-  values = []
-  SqlRunner.run(sql, values)
-end
+    sql = "DELETE FROM customers"
+    values = []
+    SqlRunner.run(sql, values)
+  end
+
+  def update
+    sql = "UPDATE customers
+    SET name = $1, funds = $2
+    WHERE id = $3"
+    values = [@name, @funds, @id]
+    SqlRunner.run(sql, values)
+  end
+
+  def buy_ticket(film)
+    if sufficient_funds?(film.price)
+      Ticket.new({'film_id' => film.id, 'customer_id' => @id}).save
+      @funds -= film.price()
+    end
+    update
+  end
+
+  def sufficient_funds?(price)
+    return price <= @funds
+  end
+
+  def films()
+    sql = "SELECT films.* FROM customers
+    INNER JOIN tickets
+    ON tickets.customer_id = customers.id
+    INNER JOIN films
+    ON tickets.film_id = films.id"
+    values = [@id]
+    films = SqlRunner.run(sql, values)
+    return films.map {|film| Film.new( film )}
+  end
 
 end

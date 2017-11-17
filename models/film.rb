@@ -34,15 +34,11 @@ class Film
   end
 
   def update
-    db = PG.connect({dbname: 'cinema', host: 'localhost'} )
     sql = "UPDATE films
-      SET title = $1,
-      price = $2,
+      SET title = $1, price = $2
       WHERE id = $3"
     values = [@title, @price, @id]
-    db.prepare('all', sql)
-    orders = db.exec_prepared('all', values)
-    db.close
+    SqlRunner.run(sql, values)
   end
 
 end
