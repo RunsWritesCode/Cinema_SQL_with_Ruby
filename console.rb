@@ -28,6 +28,13 @@ film4 = Film.new({'title' => 'Sausage Party', 'price' => 12.00})
 film4.save
 
 customer2.buy_ticket(film1)
+customer1.buy_ticket(film1)
+customer3.buy_ticket(film2)
+customer4.buy_ticket(film1)
+customer4.buy_ticket(film2)
+customer4.buy_ticket(film3)
+customer4.buy_ticket(film4)
+
 
 # customer2.buy_ticket(ticket1)
 # screening1 = Screening.new({'film_id' => film1.id, 'start_time' => '2017-01-08 04:00:00', 'empty_seats' => 20})
